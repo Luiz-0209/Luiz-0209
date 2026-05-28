@@ -1,15 +1,9 @@
-/* ============================================
-   RESET E CONFIGURAÇÕES BÁSICAS
-   ============================================ */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-/* ============================================
-   ESTILOS PRINCIPAIS
-   ============================================ */
 body {
     min-height: 100vh;
     background: linear-gradient(135deg, #a8d8ea 0%, #e0f2fe 50%, #b8e1fc 100%);
@@ -18,7 +12,6 @@ body {
     overflow-x: hidden;
 }
 
-/* Container de bolhas */
 .bubbles-container {
     position: fixed;
     top: 0;
@@ -38,10 +31,10 @@ body {
     pointer-events: none;
     box-shadow: 0 0 10px rgba(255, 255, 255, 0.5), inset 0 0 15px rgba(255, 255, 255, 0.8);
     animation: float linear infinite;
+    -webkit-backdrop-filter: blur(2px);
     backdrop-filter: blur(2px);
 }
 
-/* Container principal */
 .container {
     position: relative;
     z-index: 1;
@@ -50,9 +43,9 @@ body {
     padding: 20px;
 }
 
-/* Efeito vidro (Frutiger Aero) */
 header, .link-card, footer {
     background: rgba(255, 255, 255, 0.25);
+    -webkit-backdrop-filter: blur(12px);
     backdrop-filter: blur(12px);
     border-radius: 20px;
     border: 1px solid rgba(255, 255, 255, 0.4);
@@ -99,7 +92,6 @@ h1 {
     text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
 }
 
-/* Links */
 .links {
     display: flex;
     flex-direction: column;
@@ -146,7 +138,6 @@ h1 {
     transform: translateX(5px);
 }
 
-/* Footer */
 footer {
     text-align: center;
     padding: 20px;
@@ -155,9 +146,6 @@ footer {
     font-weight: 500;
 }
 
-/* ============================================
-   ANIMAÇÕES
-   ============================================ */
 @keyframes float {
     0% {
         transform: translateY(0) translateX(0) rotate(0deg);
@@ -192,9 +180,6 @@ footer {
     }
 }
 
-/* ============================================
-   RESPONSIVIDADE
-   ============================================ */
 @media (max-width: 768px) {
     .container {
         padding: 15px;
@@ -225,9 +210,6 @@ footer {
     }
 }
 
-/* ============================================
-   ACESSIBILIDADE
-   ============================================ */
 @media (prefers-reduced-motion: reduce) {
     .bubble, .link-card, header, .profile-img {
         animation: none !important;
