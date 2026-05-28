@@ -12,9 +12,6 @@ const CONFIG = {
     maxDuration: 8         // Duração máxima da animação (s)
 };
 
-// Verificar se estamos em ambiente GitHub Pages
-const isGitHub = window.location.hostname.includes('github.io');
-
 // ============================================
 // FUNÇÃO PARA CRIAR BOLHAS
 // ============================================
@@ -60,9 +57,9 @@ function criarBolha() {
 }
 
 // ============================================
-// SISTEMA DE NOTIFICAÇÕES
+// SISTEMA DE NOTIFICAÇÕES (VERSÃO CORRIGIDA)
 // ============================================
-function mostrarMensagem(rede) {
+window.mostrarMensagem = function(rede) {
     // Criar notificação estilo Frutiger Aero
     const toast = document.createElement('div');
     
@@ -91,10 +88,10 @@ function mostrarMensagem(rede) {
         z-index: 10000;
         box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
         border: 1px solid rgba(255, 255, 255, 0.8);
-        animation: fadeInOut 2s ease forwards;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         pointer-events: none;
         white-space: nowrap;
+        animation: fadeInOut 2s ease forwards;
     `;
     
     document.body.appendChild(toast);
@@ -104,9 +101,14 @@ function mostrarMensagem(rede) {
         if (toast && toast.remove) toast.remove();
     }, 2000);
     
-    // Log para debug (útil no GitHub)
+    // Log para debug
     console.log(`[Cartão Digital] Usuário clicou em: ${rede}`);
-}
+    
+    // Opcional: redirecionar após a mensagem
+    // setTimeout(() => {
+    //     window.open(`https://${rede.toLowerCase()}.com/seuusuario`, '_blank');
+    // }, 500);
+};
 
 // ============================================
 // INICIALIZAÇÃO
@@ -137,7 +139,7 @@ function pararBolhas() {
 }
 
 // ============================================
-// ADICIONAR ESTILOS DINÂMICOS (garantia de funcionamento)
+// ADICIONAR ESTILOS DINÂMICOS (CORRIGIDO)
 // ============================================
 function adicionarEstilosDinamicos() {
     // Verificar se os estilos já existem
@@ -146,6 +148,23 @@ function adicionarEstilosDinamicos() {
     const style = document.createElement('style');
     style.id = 'frutiger-dynamic-styles';
     style.textContent = `
+        /* Animação para as bolhas */
+        @keyframes float {
+            0% {
+                transform: translateY(0) translateX(0) rotate(0deg);
+                opacity: 0.7;
+            }
+            50% {
+                transform: translateY(-50vh) translateX(20px) rotate(180deg);
+                opacity: 0.5;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(-20px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        /* Animação para as notificações */
         @keyframes fadeInOut {
             0% {
                 opacity: 0;
@@ -165,9 +184,24 @@ function adicionarEstilosDinamicos() {
             }
         }
         
+        /* Estilo base das bolhas */
+        .bubble {
+            position: absolute;
+            bottom: -100px;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.3));
+            border-radius: 50%;
+            pointer-events: none;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5), inset 0 0 15px rgba(255, 255, 255, 0.8);
+            animation: float linear infinite;
+            backdrop-filter: blur(2px);
+            will-change: transform;
+            backface-visibility: hidden;
+        }
+        
         /* Efeito de brilho nos links */
         .link-card {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
         }
         
         .link-card:hover {
@@ -176,19 +210,13 @@ function adicionarEstilosDinamicos() {
         
         /* Responsividade para notificações em mobile */
         @media (max-width: 600px) {
-            .toast-notification {
+            div[style*="position: fixed"][style*="bottom: 30px"] {
                 font-size: 0.85em !important;
                 padding: 10px 18px !important;
                 white-space: normal !important;
                 text-align: center;
                 max-width: 90%;
             }
-        }
-        
-        /* Otimização de performance */
-        .bubble {
-            will-change: transform;
-            backface-visibility: hidden;
         }
     `;
     document.head.appendChild(style);
@@ -203,22 +231,35 @@ document.addEventListener('DOMContentLoaded', () => {
     // Adicionar estilos dinâmicos
     adicionarEstilosDinamicos();
     
+    // Verificar se o container de bolhas existe, se não, criar
+    if (!document.getElementById('bubbles-container')) {
+        const container = document.createElement('div');
+        container.id = 'bubbles-container';
+        container.className = 'bubbles-container';
+        container.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        `;
+        document.body.insertBefore(container, document.body.firstChild);
+    }
+    
     // Iniciar bolhas
     iniciarBolhas();
-    
-    // Adicionar efeito de brilho aos links
-    document.querySelectorAll('.link-card').forEach(link => {
-        link.addEventListener('mouseenter', () => {
-            link.style.transition = 'all 0.3s ease';
-        });
-    });
     
     // Pausar animações quando a página não está visível (performance)
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
             pararBolhas();
+            console.log('⏸️ Bolhas pausadas');
         } else {
             iniciarBolhas();
+            console.log('▶️ Bolhas retomadas');
         }
     });
 });
@@ -231,7 +272,6 @@ window.addEventListener('beforeunload', () => {
 // ============================================
 // FUNÇÕES DE DEBUG (úteis para GitHub)
 // ============================================
-// Expor funções no console para debug (opcional)
 if (typeof window !== 'undefined') {
     window.debugBolhas = {
         criar: criarBolha,
@@ -244,4 +284,5 @@ if (typeof window !== 'undefined') {
         config: CONFIG
     };
     console.log('💡 Dica: Use window.debugBolhas no console para controlar as bolhas');
+    console.log('💡 Use mostrarMensagem("LinkedIn") para testar notificações');
 }
